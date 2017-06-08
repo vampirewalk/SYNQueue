@@ -14,8 +14,6 @@
 		9FD63F9E1B333BDC001BD09A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9FD63F9D1B333BDC001BD09A /* Images.xcassets */; };
 		9FD63FA11B333BDC001BD09A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9FD63F9F1B333BDC001BD09A /* LaunchScreen.xib */; };
 		9FD63FAD1B333BDC001BD09A /* SYNQueueDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FAC1B333BDC001BD09A /* SYNQueueDemoTests.swift */; };
-		9FD63FB91B333E15001BD09A /* SYNQueue.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FD63FB81B333E15001BD09A /* SYNQueue.framework */; };
-		9FD63FBA1B333E15001BD09A /* SYNQueue.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9FD63FB81B333E15001BD09A /* SYNQueue.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9FD63FC51B338BA5001BD09A /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FC41B338BA5001BD09A /* TaskCell.swift */; };
 		9FD63FC71B33EA2F001BD09A /* NSUserDefaultsSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FC61B33EA2F001BD09A /* NSUserDefaultsSerializer.swift */; };
 		9FD63FCD1B3417DF001BD09A /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FCC1B3417DF001BD09A /* Utils.swift */; };
@@ -40,7 +38,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				9FD63FBA1B333E15001BD09A /* SYNQueue.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,7 +56,6 @@
 		9FD63FA61B333BDC001BD09A /* SYNQueueDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SYNQueueDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FD63FAB1B333BDC001BD09A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9FD63FAC1B333BDC001BD09A /* SYNQueueDemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SYNQueueDemoTests.swift; sourceTree = "<group>"; };
-		9FD63FB81B333E15001BD09A /* SYNQueue.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SYNQueue.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9FD63FC41B338BA5001BD09A /* TaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
 		9FD63FC61B33EA2F001BD09A /* NSUserDefaultsSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaultsSerializer.swift; sourceTree = "<group>"; };
 		9FD63FCC1B3417DF001BD09A /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
@@ -72,7 +68,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9FD63FB91B333E15001BD09A /* SYNQueue.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +84,6 @@
 		9FD63F881B333BDC001BD09A = {
 			isa = PBXGroup;
 			children = (
-				9FD63FB81B333E15001BD09A /* SYNQueue.framework */,
 				9FD63F931B333BDC001BD09A /* SYNQueueDemo */,
 				9FD63FA91B333BDC001BD09A /* SYNQueueDemoTests */,
 				9FD63F921B333BDC001BD09A /* Products */,

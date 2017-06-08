@@ -10,12 +10,6 @@ func runInBackgroundAfter(_ seconds: TimeInterval, callback:@escaping ()->()) {
     DispatchQueue.global(qos: DispatchQoS.QoSClass.background).asyncAfter(deadline: delta, execute: callback)
 }
 
-func synced(_ lock: Any, closure: () -> ()) {
-    objc_sync_enter(lock)
-    closure()
-    objc_sync_exit(lock)
-}
-
 func runOnMainThread(_ callback:@escaping ()->()) {
     DispatchQueue.main.async(execute: callback)
 }

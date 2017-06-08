@@ -50,7 +50,7 @@ class SYNQueueTests: XCTestCase {
         }
         
         queue.addTaskHandler(testTaskType) { $0.completed(nil) }
-        let task = SYNQueueTask(queue: queue, taskType: testTaskType)
+        let task = SYNQueueTask(queue: queue, taskType: testTaskType, data: nil)
         queue.addOperation(task)
         
         XCTAssert(queue.operationCount == 1)
@@ -73,7 +73,7 @@ class SYNQueueTests: XCTestCase {
             Thread.sleep(forTimeInterval: 2)
             $0.completed(nil)
         }
-        let task = SYNQueueTask(queue: queue!, taskType: testTaskType)
+        let task = SYNQueueTask(queue: queue!, taskType: testTaskType, data: nil)
         queue!.addOperation(task)
         
         // Nil out the queue to simulate app backgrounded or quit
@@ -86,7 +86,7 @@ class SYNQueueTests: XCTestCase {
         queue2.loadSerializedTasks()
         XCTAssert(queue2.operationCount == 1)
         
-        let serializedTasks = queue2.serializationProvider?.deserializeTasksInQueue(queue2)
+        let serializedTasks = queue2.serializationProvider?.deserializeTasks(queue2)
         serializedTasks?.forEach({ (task: SYNQueueTask) -> () in
             queue2.serializationProvider?.removeTask(task.taskID, queue: queue2)
         })
@@ -101,37 +101,11 @@ class SYNQueueTests: XCTestCase {
             Thread.sleep(forTimeInterval: 1)
             $0.completed(nil)
         }
-        let task = SYNQueueTask(queue: queue, taskType: testTaskType)
+        let task = SYNQueueTask(queue: queue, taskType: testTaskType, data: nil)
 
         self.measure() {
             queue.addOperation(task)
         }
-    }
-    
-    func testInternetDependency() {
-        let name = randomQueueName()
-        
-        let queue = SYNQueue(queueName: name, maxConcurrency: 3, maxRetries: 2, logProvider: logger, serializationProvider: serializer) { (error: NSError?, task: SYNQueueTask) -> Void in
-            //
-        }
-        
-        queue.addTaskHandler(testTaskType) {
-            NSThread.sleepForTimeInterval(1)
-            $0.completed(nil)
-        }
-        
-        queue.addTaskHandler("internetDependencyType") { task in
-            let reachability = Reachability.reachabilityForInternetConnection()
-            reachability?.whenReachable = { reachability in
-                task.completed(nil)
-            }
-        }
-        
-        let task = SYNQueueTask(queue: queue, taskType: testTaskType)
-        let internetDependency = SYNQueueTask(queue: queue, type: "internetDependencyType", retries: 0)
-        task.addDependency(internetDependency)
-        queue.addOperation(task)
-        
     }
 }
 

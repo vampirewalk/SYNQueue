@@ -46,7 +46,7 @@ public protocol SYNQueueLogProvider {
 */
 public protocol SYNQueueSerializationProvider {
     func serializeTask(_ task: SYNQueueTask, queueName: String)
-    func deserialzeTasks(_ queue: SYNQueue) -> [SYNQueueTask]
+    func deserializeTasks(_ queue: SYNQueue) -> [SYNQueueTask]
     func removeTask(_ taskID: String, queue: SYNQueue)
 }
 
@@ -122,7 +122,7 @@ open class SYNQueue : OperationQueue {
     open func loadSerializedTasks() {
         self.pause()
         if let sp = serializationProvider {
-            let tasks = sp.deserialzeTasks(self)
+            let tasks = sp.deserializeTasks(self)
             print("got \(tasks.count) deserialized tasks")
             for task in tasks {
                 task.setupDependencies(tasks)
