@@ -13,7 +13,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     let reachability = Reachability.init()
     
     var totalTasksSeen = 0
-    var nextTaskID = 1
+
     lazy var queue: SYNQueue = {
         return SYNQueue(queueName: "myQueue",
                         maxConcurrency: 2,
@@ -30,13 +30,6 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         
         queue.addTaskHandler("cellTask", taskHandler: taskHandler)
         queue.loadSerializedTasks()
-        
-        print("pre-loaded tasks: \(UserDefaults.standard.stringArray(forKey: "myQueue") ?? [])")
-        
-        let taskIDs = queue.operations
-            .map { return $0 as! SYNQueueTask }
-            .map { return Int($0.taskID) ?? 0 }
-        nextTaskID = (arrayMax(taskIDs) ?? 0) + 1
     }
 
     override func viewDidLayoutSubviews() {
@@ -81,7 +74,6 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         }
         
         if queue.operationCount == 0 {
-            nextTaskID = 1
             totalTasksSeen = 0
         }
         
@@ -124,18 +116,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     // MARK: - IBActions
     
     @IBAction func addTapped(_ sender: UIButton) {
-        let taskID1 = nextTaskID
-        nextTaskID += 1
-        let task1 = SYNQueueTask(queue: queue, taskID: String(describing: taskID1),
-                                 taskType: "cellTask", dependencyStrs: [], data: [:])
         
-        let shouldAddDependency = UserDefaults.standard.bool(forKey: kAddDependencySettingKey)
-        if shouldAddDependency {
-            let taskID2 = nextTaskID
-            nextTaskID += 1
-            let task2 = SYNQueueTask(queue: queue, taskID: String(describing: taskID2),
-                                     taskType: "cellTask", dependencyStrs: [], data: [:])
-            
+        let task1 = SYNQueueTask(queue: queue, taskType: "cellTask")
+        
+        if UserDefaults.standard.bool(forKey: kAddDependencySettingKey) {
+            let task2 = SYNQueueTask(queue: queue, taskType: "cellTask")
             // Make the first task dependent on the second
             task1.addDependency(task2)
             queue.addOperation(task2)

@@ -50,7 +50,7 @@ class SYNQueueTests: XCTestCase {
         }
         
         queue.addTaskHandler(testTaskType) { $0.completed(nil) }
-        let task = SYNQueueTask(queue: queue, taskType: testTaskType, data: nil)
+        let task = SYNQueueTask(queue: queue, taskType: testTaskType)
         queue.addOperation(task)
         
         XCTAssert(queue.operationCount == 1)
@@ -73,7 +73,7 @@ class SYNQueueTests: XCTestCase {
             Thread.sleep(forTimeInterval: 2)
             $0.completed(nil)
         }
-        let task = SYNQueueTask(queue: queue!, taskType: testTaskType, data: nil)
+        let task = SYNQueueTask(queue: queue!, taskType: testTaskType)
         queue!.addOperation(task)
         
         // Nil out the queue to simulate app backgrounded or quit
@@ -101,7 +101,7 @@ class SYNQueueTests: XCTestCase {
             Thread.sleep(forTimeInterval: 1)
             $0.completed(nil)
         }
-        let task = SYNQueueTask(queue: queue, taskType: testTaskType, data: nil)
+        let task = SYNQueueTask(queue: queue, taskType: testTaskType)
 
         self.measure() {
             queue.addOperation(task)

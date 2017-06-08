@@ -9,9 +9,11 @@ public typealias SYNTaskCallback = (SYNQueueTask) -> Void
 public typealias SYNTaskCompleteCallback = (NSError?, SYNQueueTask) -> Void
 public typealias JSONDictionary = [String: Any?]
 
+private let MAX_RETRY_LIMIT = 3
+
 /**
-*  Represents a task to be executed on a SYNQueue
-*/
+ *  Represents a task to be executed on a SYNQueue
+ */
 @objc
 open class SYNQueueTask : Operation {
     static let MIN_RETRY_DELAY = 0.2
@@ -22,10 +24,8 @@ open class SYNQueueTask : Operation {
     open let taskType: String
     open let data: Any?
     open let created: Date
-    open var started: Date?
     open var retries: Int
     
-    let dependencyStrs: [String]
     var lastError: NSError?
     var _executing: Bool = false
     var _finished: Bool = false
@@ -51,108 +51,88 @@ open class SYNQueueTask : Operation {
     }
     
     /**
-    Initializes a new SYNQueueTask with the following options
-    
-    - parameter queue:            The queue that will execute the task
-    - parameter taskID:           A unique identifier for the task, must be unique across app terminations, 
-                             otherwise dependencies will not work correctly
-    - parameter taskType:         A type that will be used to group tasks together, tasks have to be generic with respect to their type
-    - parameter dependencyStrs:   Identifiers for tasks that are dependencies of this task
-    - parameter data:             The data that the task needs to operate on
-    - parameter created:          When the task was created
-    - parameter started:          When the task started executing
-    - parameter retries:          Number of times this task has been retried after failing
-    - parameter queuePriority:    The priority
-    - parameter qualityOfService: The quality of service
-    
-    - returns: A new SYNQueueTask
-    */
-    public init(queue: SYNQueue, taskID: String? = nil, taskType: String,
-        dependencyStrs: [String] = [], data: Any? = nil,
-        created: Date = Date(), started: Date? = nil, retries: Int = 0,
-        queuePriority: Operation.QueuePriority = .normal,
-        qualityOfService: QualityOfService = .utility)
-    {
+     Initializes a new SYNQueueTask with the following options
+     
+     - parameter queue:            The queue that will execute the task
+     - parameter taskID:           A unique identifier for the task, must be unique across app terminations,
+     otherwise dependencies will not work correctly
+     - parameter taskType:         A type that will be used to group tasks together, tasks have to be generic with respect to their type
+     - parameter data:             The data that the task needs to operate on
+     - parameter created:          When the task was created
+     - parameter retries:          Number of times this task has been retried after failing
+     - parameter qualityOfService: The quality of service
+     
+     - returns: A new SYNQueueTask
+     */
+    public init(queue: SYNQueue,
+                taskType: String,
+                data: Any? = nil,
+                retries: Int = MAX_RETRY_LIMIT,
+                qualityOfService: QualityOfService = .utility) {
+        
         self.queue = queue
-        self.taskID = taskID ?? UUID().uuidString
         self.taskType = taskType
-        self.dependencyStrs = dependencyStrs
         self.data = data
-        self.created = created
-        self.started = started
         self.retries = retries
-        
+
+        self.taskID = UUID().uuidString
+        self.created = Date()
+
         super.init()
-        
-        self.queuePriority = queuePriority
         self.qualityOfService = qualityOfService
     }
     
-    /**
-    Initializes a new SYNQueueTask with the following options
-    
-    - parameter queue:            The queue that will execute the task
-    - parameter taskType:         A type that will be used to group tasks together, tasks have to be generic with respect to their type
-    - parameter data:             The data that the task needs to operate on
-    - parameter retries:          Number of times this task has been retried after failing
-    - parameter queuePriority:    The priority
-    - parameter qualityOfService: The quality of service
-    
-    - returns: A new SYNQueueTask
-    */
-    public convenience init(queue: SYNQueue, type: String, data: Any? = nil, retries: Int = 0, priority: Operation.QueuePriority = .normal, quality: QualityOfService = .utility) {
-        self.init(queue: queue, taskType: type, data: data, retries: retries, queuePriority: priority, qualityOfService: quality)
+    // private initializer with mandatory params; to be used by the init
+    private init(queue: SYNQueue,
+                taskID: String,
+                taskType: String,
+                data: Any?,
+                created: Date,
+                retries: Int,
+                qualityOfService: QualityOfService) {
+        
+        self.queue = queue
+        self.taskID = taskID
+        self.taskType = taskType
+        self.data = data
+        self.created = created
+        self.retries = retries
+        
+        super.init()
+        self.qualityOfService = qualityOfService
     }
-    
-    // For objective-c compatibility of convenience initializer
-    // See: http://sidhantgandhi.com/swift-default-parameter-values-in-convenience-initializers/
-    public convenience init(queue: SYNQueue, taskType: String) {
-        self.init(queue: queue, type: taskType)
-    }
-    
-    /**
-    Initializes a SYNQueueTask from a dictionary
-    
-    - parameter dictionary: A dictionary that contains the data to reconstruct a task
-    - parameter queue:      The queue that the task will execute on
 
-    - returns: A new SYNQueueTask
-    */
-    public convenience init?(dictionary: JSONDictionary, queue: SYNQueue) {
+    public init?(dictionary: JSONDictionary, queue: SYNQueue) {
         if  let taskID = dictionary["taskID"] as? String,
             let taskType = dictionary["taskType"] as? String,
-            let dependencyStrs = dictionary["dependencies"] as? [String]? ?? [],
-            let queuePriority = dictionary["queuePriority"] as? Int,
             let qualityOfService = dictionary["qualityOfService"] as? Int,
             let data: Any? = dictionary["data"] as Any??,
             let createdStr = dictionary["created"] as? String,
-            //let startedStr = dictionary["started"] as? String,
-            let retries = dictionary["retries"] as? Int? ?? 0
-        {
-            let created = Date(dateString: createdStr) ?? Date()
-            //let started = Date(dateString: startedStr)
+            let retries = dictionary["retries"] as? Int? ?? 0 {
             
-            let priority = Operation.QueuePriority(rawValue: queuePriority) ?? .normal
-            let qos = QualityOfService(rawValue: qualityOfService) ?? .utility
+            self.queue = queue
+            self.taskID = taskID
+            self.taskType = taskType
+            self.data = data
+            self.created = Date(dateString: createdStr) ?? Date()
+            self.retries = retries
             
-            self.init(queue: queue, taskID: taskID, taskType: taskType,
-                dependencyStrs: dependencyStrs, data: data, created: created,
-                started: nil, retries: retries, queuePriority: priority,
-                qualityOfService: qos)
+            super.init()
+            self.qualityOfService = QualityOfService(rawValue: qualityOfService) ?? .utility
+            
         } else {
-            self.init(queue: queue, taskID: "", taskType: "")
             return nil
         }
     }
     
     /**
-    Initializes a SYNQueueTask from JSON
-    
-    - parameter json:    JSON from which the reconstruct the task
-    - parameter queue:   The queue that the task will execute on
-    
-    - returns: A new SYNQueueTask
-    */
+     Initializes a SYNQueueTask from JSON
+     
+     - parameter json:    JSON from which the reconstruct the task
+     - parameter queue:   The queue that the task will execute on
+     
+     - returns: A new SYNQueueTask
+     */
     public convenience init?(json: String, queue: SYNQueue) {
         do {
             if let dict = try fromJSON(json) as? [String: Any] {
@@ -166,52 +146,28 @@ open class SYNQueueTask : Operation {
     }
     
     /**
-    Setup the dependencies for the task
-    
-    - parameter allTasks: Array of SYNQueueTasks that are dependencies of this task
-    */
-    open func setupDependencies(_ allTasks: [SYNQueueTask]) {
-        dependencyStrs.forEach {
-            (taskID: String) -> Void in
-            
-            let found = allTasks.filter({ taskID == $0.name })
-            if let task = found.first {
-                self.addDependency(task)
-            } else {
-                let name = self.name ?? "(unknown)"
-                self.queue.log(.Warning, "Discarding missing dependency \(taskID) from \(name)")
-            }
-        }
-    }
-    
-    /**
-    Deconstruct the task to a dictionary, used to serialize the task
-    
-    - returns: A Dictionary representation of the task
-    */
+     Deconstruct the task to a dictionary, used to serialize the task
+     
+     - returns: A Dictionary representation of the task
+     */
     open func toDictionary() -> [String: Any?] {
         var dict = [String: Any?]()
         dict["taskID"] = self.taskID as Any
         dict["taskType"] = self.taskType as Any
-        dict["dependencies"] = self.dependencyStrs as Any
         dict["queuePriority"] = self.queuePriority.rawValue as Any
         dict["qualityOfService"] = self.qualityOfService.rawValue as Any
         dict["data"] = self.data
         dict["created"] = self.created.toISOString()
-        //dict["started"] = (self.started != nil) ? self.started!.toISOString() : nil
-        if let started = self.started {
-            dict["started"] = started.toISOString()
-        }
         dict["retries"] = self.retries as Any
         
         return dict
     }
     
     /**
-    Deconstruct the task to a JSON string, used to serialize the task
-    
-    - returns: A JSON string representation of the task
-    */
+     Deconstruct the task to a JSON string, used to serialize the task
+     
+     - returns: A JSON string representation of the task
+     */
     open func toJSONString() -> String? {
         // Serialize this task to a dictionary
         let dict = toDictionary()
@@ -232,8 +188,8 @@ open class SYNQueueTask : Operation {
     }
     
     /**
-    Starts executing the task
-    */
+     Starts executing the task
+     */
     open override func start() {
         super.start()
         
@@ -242,8 +198,8 @@ open class SYNQueueTask : Operation {
     }
     
     /**
-    Cancels the task
-    */
+     Cancels the task
+     */
     open override func cancel() {
         lastError = NSError(domain: "SYNQueue", code: -1, userInfo: [NSLocalizedDescriptionKey: "Task \(taskID) was cancelled"])
         
@@ -261,11 +217,11 @@ open class SYNQueueTask : Operation {
     }
     
     /**
-    Call this to mark the task as completed, even if it failed. If it failed, we will use exponential backoff to keep retrying
-    the task until max number of retries is reached. Once this happens, we cancel the task.
-    
-    - parameter error: If the task failed, pass an error to indicate why
-    */
+     Call this to mark the task as completed, even if it failed. If it failed, we will use exponential backoff to keep retrying
+     the task until max number of retries is reached. Once this happens, we cancel the task.
+     
+     - parameter error: If the task failed, pass an error to indicate why
+     */
     open func completed(_ error: NSError?) {
         // Check to make sure we're even executing, if not
         // just ignore the completed call
