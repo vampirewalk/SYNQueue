@@ -11,6 +11,13 @@ public typealias JSONDictionary = [String: Any?]
 
 private let MAX_RETRY_LIMIT = 3
 
+private let keyTaskId = "taskId"
+private let keyTaskType = "taskType"
+private let keyTaskQos = "taskQos"
+private let keyTaskData = "taskData"
+private let keyTaskCreatedDate = "taskCreatedDate"
+private let keyTaskRetries = "taskRetries"
+
 /**
  *  Represents a task to be executed on a SYNQueue
  */
@@ -103,12 +110,12 @@ open class SYNQueueTask : Operation {
     }
 
     public init?(dictionary: JSONDictionary, queue: SYNQueue) {
-        if  let taskID = dictionary["taskID"] as? String,
-            let taskType = dictionary["taskType"] as? String,
-            let qualityOfService = dictionary["qualityOfService"] as? Int,
-            let data: Any? = dictionary["data"] as Any??,
-            let createdStr = dictionary["created"] as? String,
-            let retries = dictionary["retries"] as? Int? ?? 0 {
+        if  let taskID = dictionary[keyTaskId] as? String,
+            let taskType = dictionary[keyTaskType] as? String,
+            let qualityOfService = dictionary[keyTaskQos] as? Int,
+            let data: Any? = dictionary[keyTaskData] as Any??,
+            let createdStr = dictionary[keyTaskCreatedDate] as? String,
+            let retries = dictionary[keyTaskRetries] as? Int? ?? 0 {
             
             self.queue = queue
             self.taskID = taskID
@@ -152,13 +159,12 @@ open class SYNQueueTask : Operation {
      */
     open func toDictionary() -> [String: Any?] {
         var dict = [String: Any?]()
-        dict["taskID"] = self.taskID as Any
-        dict["taskType"] = self.taskType as Any
-        dict["queuePriority"] = self.queuePriority.rawValue as Any
-        dict["qualityOfService"] = self.qualityOfService.rawValue as Any
-        dict["data"] = self.data
-        dict["created"] = self.created.toISOString()
-        dict["retries"] = self.retries as Any
+        dict[keyTaskId] = self.taskID as Any
+        dict[keyTaskType] = self.taskType as Any
+        dict[keyTaskQos] = self.qualityOfService.rawValue as Any
+        dict[keyTaskData] = self.data
+        dict[keyTaskCreatedDate] = self.created.toISOString()
+        dict[keyTaskRetries] = self.retries as Any
         
         return dict
     }
