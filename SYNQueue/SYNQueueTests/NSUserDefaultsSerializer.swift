@@ -10,12 +10,12 @@ import SYNQueue
 class NSUserDefaultsSerializer : SYNQueueSerializationProvider {
     // MARK: - SYNQueueSerializationProvider Methods
     
-    @objc func serializeTask(task: SYNQueueTask, queueName: String) {
+    @objc func serializeTask(_ task: SYNQueueTask, queueName: String) {
         if let serialized = task.toJSONString() {
-            let defaults = NSUserDefaults.standardUserDefaults()
+            let defaults = UserDefaults.standard
             var stringArray: [String]
             
-            if let curStringArray = defaults.stringArrayForKey(queueName) {
+            if let curStringArray = defaults.stringArray(forKey: queueName) {
                 stringArray = curStringArray
                 stringArray.append(serialized)
             } else {
@@ -24,14 +24,14 @@ class NSUserDefaultsSerializer : SYNQueueSerializationProvider {
             
             defaults.setValue(stringArray, forKey: queueName)
         } else {
-            log(.Error, "Failed to serialize task \(task.taskID) in queue \(queueName)")
+            log(.error, "Failed to serialize task \(task.taskID) in queue \(queueName)")
         }
     }
     
-    @objc func deserializeTasksInQueue(queue: SYNQueue) -> [SYNQueueTask] {
-        let defaults = NSUserDefaults.standardUserDefaults()
+    @objc func deserializeTasksInQueue(_ queue: SYNQueue) -> [SYNQueueTask] {
+        let defaults = UserDefaults.standard
         if  let queueName = queue.name,
-            let stringArray = defaults.stringArrayForKey(queueName)
+            let stringArray = defaults.stringArray(forKey: queueName)
         {
             return stringArray
                 .map { return SYNQueueTask(json: $0, queue: queue) }
@@ -42,7 +42,7 @@ class NSUserDefaultsSerializer : SYNQueueSerializationProvider {
         return []
     }
     
-    @objc func removeTask(taskID: String, queue: SYNQueue) {
+    @objc func removeTask(_ taskID: String, queue: SYNQueue) {
         if let queueName = queue.name {
             var curArray: [SYNQueueTask] = deserializeTasksInQueue(queue)
             curArray = curArray.filter { return $0.taskID != taskID }
@@ -52,7 +52,7 @@ class NSUserDefaultsSerializer : SYNQueueSerializationProvider {
                 .filter { return $0 != nil }
                 .map { return $0! }
             
-            let defaults = NSUserDefaults.standardUserDefaults()
+            let defaults = UserDefaults.standard
             defaults.setValue(stringArray, forKey: queueName)
         }
     }

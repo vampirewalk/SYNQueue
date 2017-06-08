@@ -6,7 +6,7 @@
 import Foundation
 import SYNQueue
 
-func log(level: LogLevel, _ msg: String) {
+func log(_ level: LogLevel, _ msg: String) {
     return ConsoleLogger.log(level, msg)
 }
 
@@ -14,11 +14,11 @@ func log(level: LogLevel, _ msg: String) {
 class ConsoleLogger : SYNQueueLogProvider {
     // MARK: - SYNQueueLogProvider Delegates
     
-    @objc func log(level: LogLevel, _ msg: String) {
+    @objc func log(_ level: LogLevel, _ msg: String) {
         return ConsoleLogger.log(level, msg)
     }
     
-    class func log(level: LogLevel, _ msg: String) {
-        runOnMainThread { print("[\(level.toString().uppercaseString)] \(msg)") }
+    class func log(_ level: LogLevel, _ msg: String) {
+        runOnMainThread { print("[\(level.toString().uppercased())] \(msg)") }
     }
 }

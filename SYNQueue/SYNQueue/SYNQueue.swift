@@ -38,27 +38,26 @@ public enum LogLevel: Int {
 */
 @objc
 public protocol SYNQueueLogProvider {
-    func log(level: LogLevel, _ msg: String)
+    func log(_ level: LogLevel, _ msg: String)
 }
 
 /**
 *  Conform to this protocol to provide serialization (persistence) to SYNQueue
 */
-@objc
 public protocol SYNQueueSerializationProvider {
-    func serializeTask(task: SYNQueueTask, queueName: String)
-    func deserializeTasksInQueue(queue: SYNQueue) -> [SYNQueueTask]
-    func removeTask(taskID: String, queue: SYNQueue)
+    func serializeTask(_ task: SYNQueueTask, queueName: String)
+    func deserialzeTasks(_ queue: SYNQueue) -> [SYNQueueTask]
+    func removeTask(_ taskID: String, queue: SYNQueue)
 }
 
 /**
 *  SYNQueue is a generic queue with customizable serialization, logging, task handling, retries, and concurrency behavior
 */
 @objc
-public class SYNQueue : NSOperationQueue {
+open class SYNQueue : OperationQueue {
     
     /// The maximum number of times a task will be retried if it fails
-    public let maxRetries: Int
+    open let maxRetries: Int
     
     let serializationProvider: SYNQueueSerializationProvider?
     let logProvider: SYNQueueLogProvider?
@@ -66,7 +65,7 @@ public class SYNQueue : NSOperationQueue {
     var taskHandlers = [String: SYNTaskCallback]()
     let completionBlock: SYNTaskCompleteCallback?
     
-    public var tasks: [SYNQueueTask] {
+    open var tasks: [SYNQueueTask] {
         let array = operations
         
         var output = [SYNQueueTask]()
@@ -113,25 +112,27 @@ public class SYNQueue : NSOperationQueue {
     - parameter taskType:    The task type for the handler
     - parameter taskHandler: The handler for this particular task type, must be generic for the task type
     */
-    public func addTaskHandler(taskType: String, taskHandler:SYNTaskCallback) {
+    open func addTaskHandler(_ taskType: String, taskHandler:@escaping SYNTaskCallback) {
         taskHandlers[taskType] = taskHandler
     }
     
     /**
     Deserializes tasks that were serialized (persisted)
     */
-    public func loadSerializedTasks() {
+    open func loadSerializedTasks() {
+        self.pause()
         if let sp = serializationProvider {
-            let tasks = sp.deserializeTasksInQueue(self)
-            
+            let tasks = sp.deserialzeTasks(self)
+            print("got \(tasks.count) deserialized tasks")
             for task in tasks {
                 task.setupDependencies(tasks)
                 addDeserializedTask(task)
             }
         }
+        self.start()
     }
     
-    public func getTask(taskID: String) -> SYNQueueTask? {
+    open func getTask(_ taskID: String) -> SYNQueueTask? {
         return tasksMap[taskID]
     }
     
@@ -140,7 +141,7 @@ public class SYNQueue : NSOperationQueue {
     
     - parameter op: A SYNQueueTask to execute on the queue
     */
-    override public func addOperation(op: NSOperation) {
+    override open func addOperation(_ op: Operation) {
         if let task = op as? SYNQueueTask {
             if tasksMap[task.taskID] != nil {
                 log(.Warning, "Attempted to add duplicate task \(task.taskID)")
@@ -155,10 +156,18 @@ public class SYNQueue : NSOperationQueue {
         }
         
         op.completionBlock = { self.taskComplete(op) }
-        super.addOperation(op)
+        super.addOperation(op)        
     }
     
-    func addDeserializedTask(task: SYNQueueTask) {
+    open func start() {
+        self.isSuspended = false
+    }
+    
+    open func pause() {
+        self.isSuspended = true
+    }
+    
+    func addDeserializedTask(_ task: SYNQueueTask) {
         if tasksMap[task.taskID] != nil {
             log(.Warning, "Attempted to add duplicate deserialized task \(task.taskID)")
             return
@@ -168,7 +177,7 @@ public class SYNQueue : NSOperationQueue {
         super.addOperation(task)
     }
     
-    func runTask(task: SYNQueueTask) {
+    func runTask(_ task: SYNQueueTask) {
         if let handler = taskHandlers[task.taskType] {
             handler(task)
         } else {
@@ -177,9 +186,9 @@ public class SYNQueue : NSOperationQueue {
         }
     }
     
-    func taskComplete(op: NSOperation) {
+    func taskComplete(_ op: Operation) {
         if let task = op as? SYNQueueTask {
-            tasksMap.removeValueForKey(task.taskID)
+            tasksMap.removeValue(forKey: task.taskID)
             
             if let handler = completionBlock {
                 handler(task.lastError, task)
@@ -192,7 +201,7 @@ public class SYNQueue : NSOperationQueue {
         }
     }
     
-    func log(level: LogLevel, _ msg: String) {
+    func log(_ level: LogLevel, _ msg: String) {
         logProvider?.log(level, msg)
     }
 }

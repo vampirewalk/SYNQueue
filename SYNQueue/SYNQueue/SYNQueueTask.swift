@@ -7,46 +7,46 @@ import Foundation
 
 public typealias SYNTaskCallback = (SYNQueueTask) -> Void
 public typealias SYNTaskCompleteCallback = (NSError?, SYNQueueTask) -> Void
-public typealias JSONDictionary = [String: AnyObject?]
+public typealias JSONDictionary = [String: Any?]
 
 /**
 *  Represents a task to be executed on a SYNQueue
 */
 @objc
-public class SYNQueueTask : NSOperation {
+open class SYNQueueTask : Operation {
     static let MIN_RETRY_DELAY = 0.2
     static let MAX_RETRY_DELAY = 60.0
     
-    public let queue: SYNQueue
-    public let taskID: String
-    public let taskType: String
-    public let data: AnyObject?
-    public let created: NSDate
-    public var started: NSDate?
-    public var retries: Int
+    open let queue: SYNQueue
+    open let taskID: String
+    open let taskType: String
+    open let data: Any?
+    open let created: Date
+    open var started: Date?
+    open var retries: Int
     
     let dependencyStrs: [String]
     var lastError: NSError?
     var _executing: Bool = false
     var _finished: Bool = false
     
-    public override var name: String? { get { return taskID } set { } }
-    public override var asynchronous: Bool { return true }
+    open override var name: String? { get { return taskID } set { } }
+    open override var isAsynchronous: Bool { return true }
     
-    public override var executing: Bool {
+    open override var isExecuting: Bool {
         get { return _executing }
         set {
-            willChangeValueForKey("isExecuting")
+            willChangeValue(forKey: "isExecuting")
             _executing = newValue
-            didChangeValueForKey("isExecuting")
+            didChangeValue(forKey: "isExecuting")
         }
     }
-    public override var finished: Bool {
+    open override var isFinished: Bool {
         get { return _finished }
         set {
-            willChangeValueForKey("isFinished")
+            willChangeValue(forKey: "isFinished")
             _finished = newValue
-            didChangeValueForKey("isFinished")
+            didChangeValue(forKey: "isFinished")
         }
     }
     
@@ -67,14 +67,14 @@ public class SYNQueueTask : NSOperation {
     
     - returns: A new SYNQueueTask
     */
-    private init(queue: SYNQueue, taskID: String? = nil, taskType: String,
-        dependencyStrs: [String] = [], data: AnyObject? = nil,
-        created: NSDate = NSDate(), started: NSDate? = nil, retries: Int = 0,
-        queuePriority: NSOperationQueuePriority = .Normal,
-        qualityOfService: NSQualityOfService = .Utility)
+    public init(queue: SYNQueue, taskID: String? = nil, taskType: String,
+        dependencyStrs: [String] = [], data: Any? = nil,
+        created: Date = Date(), started: Date? = nil, retries: Int = 0,
+        queuePriority: Operation.QueuePriority = .normal,
+        qualityOfService: QualityOfService = .utility)
     {
         self.queue = queue
-        self.taskID = taskID ?? NSUUID().UUIDString
+        self.taskID = taskID ?? UUID().uuidString
         self.taskType = taskType
         self.dependencyStrs = dependencyStrs
         self.data = data
@@ -100,7 +100,7 @@ public class SYNQueueTask : NSOperation {
     
     - returns: A new SYNQueueTask
     */
-    public convenience init(queue: SYNQueue, type: String, data: AnyObject? = nil, retries: Int = 0, priority: NSOperationQueuePriority = .Normal, quality: NSQualityOfService = .Utility) {
+    public convenience init(queue: SYNQueue, type: String, data: Any? = nil, retries: Int = 0, priority: Operation.QueuePriority = .normal, quality: QualityOfService = .utility) {
         self.init(queue: queue, taskType: type, data: data, retries: retries, queuePriority: priority, qualityOfService: quality)
     }
     
@@ -124,19 +124,20 @@ public class SYNQueueTask : NSOperation {
             let dependencyStrs = dictionary["dependencies"] as? [String]? ?? [],
             let queuePriority = dictionary["queuePriority"] as? Int,
             let qualityOfService = dictionary["qualityOfService"] as? Int,
-            let data: AnyObject? = dictionary["data"] as AnyObject??,
+            let data: Any? = dictionary["data"] as Any??,
             let createdStr = dictionary["created"] as? String,
-            let startedStr: String? = dictionary["started"] as? String ?? nil,
+            //let startedStr = dictionary["started"] as? String,
             let retries = dictionary["retries"] as? Int? ?? 0
         {
-            let created = NSDate(dateString: createdStr) ?? NSDate()
-            let started = (startedStr != nil) ? NSDate(dateString: startedStr!) : nil
-            let priority = NSOperationQueuePriority(rawValue: queuePriority) ?? .Normal
-            let qos = NSQualityOfService(rawValue: qualityOfService) ?? .Utility
+            let created = Date(dateString: createdStr) ?? Date()
+            //let started = Date(dateString: startedStr)
+            
+            let priority = Operation.QueuePriority(rawValue: queuePriority) ?? .normal
+            let qos = QualityOfService(rawValue: qualityOfService) ?? .utility
             
             self.init(queue: queue, taskID: taskID, taskType: taskType,
                 dependencyStrs: dependencyStrs, data: data, created: created,
-                started: started, retries: retries, queuePriority: priority,
+                started: nil, retries: retries, queuePriority: priority,
                 qualityOfService: qos)
         } else {
             self.init(queue: queue, taskID: "", taskType: "")
@@ -154,7 +155,7 @@ public class SYNQueueTask : NSOperation {
     */
     public convenience init?(json: String, queue: SYNQueue) {
         do {
-            if let dict = try fromJSON(json) as? [String: AnyObject] {
+            if let dict = try fromJSON(json) as? [String: Any] {
                 self.init(dictionary: dict, queue: queue)
             } else {
                 return nil
@@ -169,7 +170,7 @@ public class SYNQueueTask : NSOperation {
     
     - parameter allTasks: Array of SYNQueueTasks that are dependencies of this task
     */
-    public func setupDependencies(allTasks: [SYNQueueTask]) {
+    open func setupDependencies(_ allTasks: [SYNQueueTask]) {
         dependencyStrs.forEach {
             (taskID: String) -> Void in
             
@@ -188,17 +189,20 @@ public class SYNQueueTask : NSOperation {
     
     - returns: A Dictionary representation of the task
     */
-    public func toDictionary() -> [String: AnyObject?] {
-        var dict = [String: AnyObject?]()
-        dict["taskID"] = self.taskID
-        dict["taskType"] = self.taskType
-        dict["dependencies"] = self.dependencyStrs
-        dict["queuePriority"] = self.queuePriority.rawValue
-        dict["qualityOfService"] = self.qualityOfService.rawValue
+    open func toDictionary() -> [String: Any?] {
+        var dict = [String: Any?]()
+        dict["taskID"] = self.taskID as Any
+        dict["taskType"] = self.taskType as Any
+        dict["dependencies"] = self.dependencyStrs as Any
+        dict["queuePriority"] = self.queuePriority.rawValue as Any
+        dict["qualityOfService"] = self.qualityOfService.rawValue as Any
         dict["data"] = self.data
         dict["created"] = self.created.toISOString()
-        dict["started"] = (self.started != nil) ? self.started!.toISOString() : nil
-        dict["retries"] = self.retries
+        //dict["started"] = (self.started != nil) ? self.started!.toISOString() : nil
+        if let started = self.started {
+            dict["started"] = started.toISOString()
+        }
+        dict["retries"] = self.retries as Any
         
         return dict
     }
@@ -208,7 +212,7 @@ public class SYNQueueTask : NSOperation {
     
     - returns: A JSON string representation of the task
     */
-    public func toJSONString() -> String? {
+    open func toJSONString() -> String? {
         // Serialize this task to a dictionary
         let dict = toDictionary()
         
@@ -230,28 +234,28 @@ public class SYNQueueTask : NSOperation {
     /**
     Starts executing the task
     */
-    public override func start() {
+    open override func start() {
         super.start()
         
-        executing = true
+        isExecuting = true
         run()
     }
     
     /**
     Cancels the task
     */
-    public override func cancel() {
+    open override func cancel() {
         lastError = NSError(domain: "SYNQueue", code: -1, userInfo: [NSLocalizedDescriptionKey: "Task \(taskID) was cancelled"])
         
         super.cancel()
         
         queue.log(.Debug, "Canceled task \(taskID)")
-        finished = true
+        isFinished = true
     }
     
     func run() {
-        if cancelled && !finished { finished = true }
-        if finished { return }
+        if isCancelled && !isFinished { isFinished = true }
+        if isFinished { return }
         
         queue.runTask(self)
     }
@@ -262,10 +266,10 @@ public class SYNQueueTask : NSOperation {
     
     - parameter error: If the task failed, pass an error to indicate why
     */
-    public func completed(error: NSError?) {
+    open func completed(_ error: NSError?) {
         // Check to make sure we're even executing, if not
         // just ignore the completed call
-        if (!executing) {
+        if (!isExecuting) {
             queue.log(.Debug, "Completion called on already completed task \(taskID)")
             return
         }
@@ -275,22 +279,23 @@ public class SYNQueueTask : NSOperation {
             queue.log(.Warning, "Task \(taskID) failed with error: \(error)")
             
             // Check if we've exceeded the max allowed retries
-            if ++retries >= queue.maxRetries {
+            retries += 1
+            if retries >= queue.maxRetries {
                 queue.log(.Error, "Max retries exceeded for task \(taskID)")
                 cancel()
                 return
             }
             
             // Wait a bit (exponential backoff) and retry this task
-            let exp = Double(min(queue.maxRetries ?? 0, retries))
-            let seconds:NSTimeInterval = min(SYNQueueTask.MAX_RETRY_DELAY, SYNQueueTask.MIN_RETRY_DELAY * pow(2.0, exp - 1))
+            let exp = Double(min(queue.maxRetries , retries))
+            let seconds:TimeInterval = min(SYNQueueTask.MAX_RETRY_DELAY, SYNQueueTask.MIN_RETRY_DELAY * pow(2.0, exp - 1))
             
             queue.log(.Debug, "Waiting \(seconds) seconds to retry task \(taskID)")
             runInBackgroundAfter(seconds) { self.run() }
         } else {
             lastError = nil
             queue.log(.Debug, "Task \(taskID) completed")
-            finished = true
+            isFinished = true
         }
     }
 }
