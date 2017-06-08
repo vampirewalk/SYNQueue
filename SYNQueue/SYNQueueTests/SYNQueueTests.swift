@@ -10,7 +10,7 @@ import XCTest
 class SYNQueueTests: XCTestCase {
     
     var logger = ConsoleLogger()
-    var serializer = NSUserDefaultsSerializer()
+    var serializer = UserDefaultsSerializer()
     let testTaskType = "testTaskType"
     
     override func setUp() {
@@ -18,7 +18,7 @@ class SYNQueueTests: XCTestCase {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         
         logger = ConsoleLogger()
-        serializer = NSUserDefaultsSerializer()
+        serializer = UserDefaultsSerializer()
         
     }
     

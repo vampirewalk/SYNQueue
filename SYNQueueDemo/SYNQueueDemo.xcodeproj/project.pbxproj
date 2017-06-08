@@ -15,7 +15,7 @@
 		9FD63FA11B333BDC001BD09A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9FD63F9F1B333BDC001BD09A /* LaunchScreen.xib */; };
 		9FD63FAD1B333BDC001BD09A /* SYNQueueDemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FAC1B333BDC001BD09A /* SYNQueueDemoTests.swift */; };
 		9FD63FC51B338BA5001BD09A /* TaskCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FC41B338BA5001BD09A /* TaskCell.swift */; };
-		9FD63FC71B33EA2F001BD09A /* NSUserDefaultsSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FC61B33EA2F001BD09A /* NSUserDefaultsSerializer.swift */; };
+		9FD63FC71B33EA2F001BD09A /* UserDefaultsSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FC61B33EA2F001BD09A /* UserDefaultsSerializer.swift */; };
 		9FD63FCD1B3417DF001BD09A /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FCC1B3417DF001BD09A /* Utils.swift */; };
 		DC67E47E1BB0F01200F3D9E2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DC67E47D1BB0F01200F3D9E2 /* Main.storyboard */; };
 		DC67E4801BB0F1BD00F3D9E2 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC67E47F1BB0F1BD00F3D9E2 /* SettingsViewController.swift */; };
@@ -57,7 +57,7 @@
 		9FD63FAB1B333BDC001BD09A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9FD63FAC1B333BDC001BD09A /* SYNQueueDemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SYNQueueDemoTests.swift; sourceTree = "<group>"; };
 		9FD63FC41B338BA5001BD09A /* TaskCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TaskCell.swift; sourceTree = "<group>"; };
-		9FD63FC61B33EA2F001BD09A /* NSUserDefaultsSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaultsSerializer.swift; sourceTree = "<group>"; };
+		9FD63FC61B33EA2F001BD09A /* UserDefaultsSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsSerializer.swift; sourceTree = "<group>"; };
 		9FD63FCC1B3417DF001BD09A /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		DC67E47D1BB0F01200F3D9E2 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		DC67E47F1BB0F1BD00F3D9E2 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -112,7 +112,7 @@
 				DC67E47D1BB0F01200F3D9E2 /* Main.storyboard */,
 				9FD63F9F1B333BDC001BD09A /* LaunchScreen.xib */,
 				9FD63FC41B338BA5001BD09A /* TaskCell.swift */,
-				9FD63FC61B33EA2F001BD09A /* NSUserDefaultsSerializer.swift */,
+				9FD63FC61B33EA2F001BD09A /* UserDefaultsSerializer.swift */,
 				9FD63FCC1B3417DF001BD09A /* Utils.swift */,
 			);
 			path = SYNQueueDemo;
@@ -256,7 +256,7 @@
 				9F70B5031B368AB500BDB945 /* ConsoleLogger.swift in Sources */,
 				9FD63F971B333BDC001BD09A /* AppDelegate.swift in Sources */,
 				0EB0B1B31EE7E85E00B43FB0 /* Reachability.swift in Sources */,
-				9FD63FC71B33EA2F001BD09A /* NSUserDefaultsSerializer.swift in Sources */,
+				9FD63FC71B33EA2F001BD09A /* UserDefaultsSerializer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

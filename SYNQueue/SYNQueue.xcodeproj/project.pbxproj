@@ -13,7 +13,7 @@
 		9FD63FBF1B334316001BD09A /* NSDate+Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FBE1B334316001BD09A /* NSDate+Utils.swift */; };
 		9FD63FC11B335579001BD09A /* SYNQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD63FC01B335579001BD09A /* SYNQueue.swift */; };
 		DCD110DA1BBA166B003AF0F0 /* ConsoleLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD110D81BBA166B003AF0F0 /* ConsoleLogger.swift */; };
-		DCD110DB1BBA166B003AF0F0 /* NSUserDefaultsSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD110D91BBA166B003AF0F0 /* NSUserDefaultsSerializer.swift */; };
+		DCD110DB1BBA166B003AF0F0 /* UserDefaultsSerializer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD110D91BBA166B003AF0F0 /* UserDefaultsSerializer.swift */; };
 		DCD110E01BBA2F1E003AF0F0 /* SYNQueue.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9F62022B1B333AAF0026CE2C /* SYNQueue.framework */; };
 		DCD110E21BBA2FB0003AF0F0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD110E11BBA2FB0003AF0F0 /* Utils.swift */; };
 		DCD110E31BBA2FBC003AF0F0 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD110E11BBA2FB0003AF0F0 /* Utils.swift */; };
@@ -40,7 +40,7 @@
 		9FD63FBE1B334316001BD09A /* NSDate+Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Utils.swift"; sourceTree = "<group>"; };
 		9FD63FC01B335579001BD09A /* SYNQueue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SYNQueue.swift; sourceTree = "<group>"; };
 		DCD110D81BBA166B003AF0F0 /* ConsoleLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleLogger.swift; sourceTree = "<group>"; };
-		DCD110D91BBA166B003AF0F0 /* NSUserDefaultsSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSUserDefaultsSerializer.swift; sourceTree = "<group>"; };
+		DCD110D91BBA166B003AF0F0 /* UserDefaultsSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefaultsSerializer.swift; sourceTree = "<group>"; };
 		DCD110E11BBA2FB0003AF0F0 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,7 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				DCD110D81BBA166B003AF0F0 /* ConsoleLogger.swift */,
-				DCD110D91BBA166B003AF0F0 /* NSUserDefaultsSerializer.swift */,
+				DCD110D91BBA166B003AF0F0 /* UserDefaultsSerializer.swift */,
 				9F62023C1B333AAF0026CE2C /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -244,7 +244,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DCD110E31BBA2FBC003AF0F0 /* Utils.swift in Sources */,
-				DCD110DB1BBA166B003AF0F0 /* NSUserDefaultsSerializer.swift in Sources */,
+				DCD110DB1BBA166B003AF0F0 /* UserDefaultsSerializer.swift in Sources */,
 				DCD110DA1BBA166B003AF0F0 /* ConsoleLogger.swift in Sources */,
 				9F62023E1B333AAF0026CE2C /* SYNQueueTests.swift in Sources */,
 			);

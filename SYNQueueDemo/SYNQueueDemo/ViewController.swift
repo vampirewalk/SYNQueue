@@ -19,7 +19,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
                         maxConcurrency: 2,
                         maxRetries: 3,
                         logProvider: ConsoleLogger(),
-                        serializationProvider: NSUserDefaultsSerializer(),
+                        serializationProvider: UserDefaultsSerializer(),
                         completionBlock: { [weak self] in self?.taskComplete($0, $1) })
     }()
     
