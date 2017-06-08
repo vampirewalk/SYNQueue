@@ -6,19 +6,16 @@
 import Foundation
 import SYNQueue
 
+import Foundation
+
 func log(_ level: LogLevel, _ msg: String) {
-    return ConsoleLogger.log(level, msg)
+    return ConsoleLogger().log(level, msg)
 }
 
-
-class ConsoleLogger : SYNQueueLogProvider {
-    // MARK: - SYNQueueLogProvider Delegates
+public class ConsoleLogger: SYNQueueLogProvider {
     
-    @objc func log(_ level: LogLevel, _ msg: String) {
-        return ConsoleLogger.log(level, msg)
-    }
-    
-    class func log(_ level: LogLevel, _ msg: String) {
-        runOnMainThread { print("[\(level.toString().uppercased())] \(msg)") }
+    public func log(_ level: LogLevel, _ msg: String) {
+        print("[\(level.toString())] \(msg)")
     }
 }
+

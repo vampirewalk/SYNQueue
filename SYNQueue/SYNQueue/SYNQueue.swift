@@ -44,6 +44,7 @@ public protocol SYNQueueLogProvider {
 /**
 *  Conform to this protocol to provide serialization (persistence) to SYNQueue
 */
+@objc
 public protocol SYNQueueSerializationProvider {
     func serializeTask(_ task: SYNQueueTask, queueName: String)
     func deserializeTasks(_ queue: SYNQueue) -> [SYNQueueTask]
