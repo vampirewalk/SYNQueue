@@ -89,6 +89,25 @@ open class SYNQueueTask : Operation {
         self.qualityOfService = qualityOfService
     }
     
+    public init(queue: SYNQueue,
+                taskID: String,
+                taskType: String,
+                data: Any? = nil,
+                retries: Int = MAX_RETRY_LIMIT,
+                qualityOfService: QualityOfService = .utility) {
+        
+        self.queue = queue
+        self.taskType = taskType
+        self.data = data
+        self.retries = retries
+        
+        self.taskID = taskID
+        self.created = Date()
+        
+        super.init()
+        self.qualityOfService = qualityOfService
+    }
+    
     // private initializer with mandatory params; to be used by the init
     private init(queue: SYNQueue,
                 taskID: String,
