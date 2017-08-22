@@ -127,6 +127,7 @@ open class SYNQueue : OperationQueue {
         if let sp = serializationProvider {
             let tasks = sp.deserializeTasks(self)
             for task in tasks {
+                task.setupDependencies(tasks)
                 addDeserializedTask(task)
             }
         }

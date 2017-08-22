@@ -13,6 +13,7 @@ private let MAX_RETRY_LIMIT = 3
 
 private let keyTaskId = "taskId"
 private let keyTaskType = "taskType"
+private let keyTaskDependencies = "taskDependencies"
 private let keyTaskQos = "taskQos"
 private let keyTaskData = "taskData"
 private let keyTaskCreatedDate = "taskCreatedDate"
@@ -33,6 +34,7 @@ open class SYNQueueTask : Operation {
     open let created: Date
     open var retries: Int
     
+    let dependencyStrs: [String]
     var lastError: NSError?
     var _executing: Bool = false
     var _finished: Bool = false
@@ -64,6 +66,7 @@ open class SYNQueueTask : Operation {
      - parameter taskID:           A unique identifier for the task, must be unique across app terminations,
      otherwise dependencies will not work correctly
      - parameter taskType:         A type that will be used to group tasks together, tasks have to be generic with respect to their type
+     - parameter dependencyStrs:   Identifiers for tasks that are dependencies of this task
      - parameter data:             The data that the task needs to operate on
      - parameter created:          When the task was created
      - parameter retries:          Number of times this task has been retried after failing
@@ -73,12 +76,14 @@ open class SYNQueueTask : Operation {
      */
     public init(queue: SYNQueue,
                 taskType: String,
+                dependencyStrs: [String] = [],
                 data: Any? = nil,
                 retries: Int = MAX_RETRY_LIMIT,
                 qualityOfService: QualityOfService = .utility) {
         
         self.queue = queue
         self.taskType = taskType
+        self.dependencyStrs = dependencyStrs
         self.data = data
         self.retries = retries
 
@@ -92,12 +97,14 @@ open class SYNQueueTask : Operation {
     public init(queue: SYNQueue,
                 taskID: String,
                 taskType: String,
+                dependencyStrs: [String] = [],
                 data: Any? = nil,
                 retries: Int = MAX_RETRY_LIMIT,
                 qualityOfService: QualityOfService = .utility) {
         
         self.queue = queue
         self.taskType = taskType
+        self.dependencyStrs = dependencyStrs
         self.data = data
         self.retries = retries
         
@@ -112,6 +119,7 @@ open class SYNQueueTask : Operation {
     private init(queue: SYNQueue,
                 taskID: String,
                 taskType: String,
+                dependencyStrs: [String] = [],
                 data: Any?,
                 created: Date,
                 retries: Int,
@@ -120,6 +128,7 @@ open class SYNQueueTask : Operation {
         self.queue = queue
         self.taskID = taskID
         self.taskType = taskType
+        self.dependencyStrs = dependencyStrs
         self.data = data
         self.created = created
         self.retries = retries
@@ -131,6 +140,7 @@ open class SYNQueueTask : Operation {
     public init?(dictionary: JSONDictionary, queue: SYNQueue) {
         if  let taskID = dictionary[keyTaskId] as? String,
             let taskType = dictionary[keyTaskType] as? String,
+            let dependencyStrs = dictionary[keyTaskDependencies] as? [String]? ?? [],
             let qualityOfService = dictionary[keyTaskQos] as? Int,
             let data: Any? = dictionary[keyTaskData] as Any??,
             let createdStr = dictionary[keyTaskCreatedDate] as? String,
@@ -139,6 +149,7 @@ open class SYNQueueTask : Operation {
             self.queue = queue
             self.taskID = taskID
             self.taskType = taskType
+            self.dependencyStrs = dependencyStrs
             self.data = data
             self.created = Date(dateString: createdStr) ?? Date()
             self.retries = retries
@@ -172,6 +183,25 @@ open class SYNQueueTask : Operation {
     }
     
     /**
+     Setup the dependencies for the task
+     
+     - parameter allTasks: Array of SYNQueueTasks that are dependencies of this task
+     */
+    public func setupDependencies(_ allTasks: [SYNQueueTask]) {
+        dependencyStrs.forEach {
+            (taskID: String) -> Void in
+            
+            let found = allTasks.filter({ taskID == $0.name })
+            if let task = found.first {
+                self.addDependency(task)
+            } else {
+                let name = self.name ?? "(unknown)"
+                self.queue.log(.Warning, "Discarding missing dependency \(taskID) from \(name)")
+            }
+        }
+    }
+    
+    /**
      Deconstruct the task to a dictionary, used to serialize the task
      
      - returns: A Dictionary representation of the task
@@ -180,6 +210,7 @@ open class SYNQueueTask : Operation {
         var dict = [String: Any?]()
         dict[keyTaskId] = self.taskID as Any
         dict[keyTaskType] = self.taskType as Any
+        dict[keyTaskDependencies] = self.dependencyStrs as Any
         dict[keyTaskQos] = self.qualityOfService.rawValue as Any
         dict[keyTaskData] = self.data
         dict[keyTaskCreatedDate] = self.created.toISOString()
