@@ -157,7 +157,11 @@ open class SYNQueue : OperationQueue {
             }
         }
         
-        op.completionBlock = { self.taskComplete(op) }
+        op.completionBlock = { [weak self, weak op] in
+            guard let queue = self, let op = op else { return }
+            queue.taskComplete(op)
+        }
+
         super.addOperation(op)
     }
     
@@ -169,13 +173,28 @@ open class SYNQueue : OperationQueue {
         self.isSuspended = true
     }
     
+    open override func cancelAllOperations() {
+        for (taskID, task) in taskMap {
+            // Remove this operation from serialization
+            if let sp = serializationProvider {
+                sp.removeTask(taskID, queue: task.queue)
+            }
+        }
+        taskMap.removeAll()
+        super.cancelAllOperations()
+    }
+    
     func addDeserializedTask(_ task: SYNQueueTask) {
         if taskMap[task.taskID] != nil {
             log(.Warning, "Attempted to add duplicate deserialized task \(task.taskID)")
             return
         }
         
-        task.completionBlock = { self.taskComplete(task) }
+        task.completionBlock = { [weak self, weak task] in
+            guard let queue = self, let task = task else { return }
+            queue.taskComplete(task)
+        }
+
         super.addOperation(task)
     }
     

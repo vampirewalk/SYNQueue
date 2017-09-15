@@ -27,7 +27,7 @@ open class SYNQueueTask : Operation {
     static let MIN_RETRY_DELAY = 0.2
     static let MAX_RETRY_DELAY = 60.0
     
-    open let queue: SYNQueue
+    open unowned let queue: SYNQueue
     open let taskID: String
     open let taskType: String
     open let data: Any?
@@ -303,7 +303,7 @@ open class SYNQueueTask : Operation {
             let seconds:TimeInterval = min(SYNQueueTask.MAX_RETRY_DELAY, SYNQueueTask.MIN_RETRY_DELAY * pow(2.0, exp - 1))
             
             queue.log(.Debug, "Waiting \(seconds) seconds to retry task \(taskID)")
-            runInBackgroundAfter(seconds) { self.run() }
+            runInBackgroundAfter(seconds) { [weak self] in self?.run() }
         } else {
             lastError = nil
             queue.log(.Debug, "Task \(taskID) completed")
